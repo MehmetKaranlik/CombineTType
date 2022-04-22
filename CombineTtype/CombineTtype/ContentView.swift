@@ -1,9 +1,9 @@
-//
-//  ContentView.swift
-//  CombineTtype
-//
-//  Created by mehmet karanlık on 22.04.2022.
-//
+ //
+ //  ContentView.swift
+ //  CombineTtype
+ //
+ //  Created by mehmet karanlık on 22.04.2022.
+ //
 
 import SwiftUI
 import Combine
@@ -11,32 +11,32 @@ import Combine
 struct ContentView: View {
  @ObservedObject var vm = CombineTTypeViewModel()
 
-    var body: some View {
+ var body: some View {
 
-     ScrollView {
-      VStack(alignment:.leading) {
+  ScrollView {
+   VStack(alignment:.leading) {
 
-       ForEach(vm.posts, id: \.self) { post in
-        VStack(alignment:.leading) {
-         Text(post?.title ?? "")
-          .font(.title)
-          .foregroundColor(.black)
-         // .multilineTextAlignment(.center)
-         Text(post?.body ?? "")
-          .font(.body)
-          .foregroundColor(.gray)
-        }
-       }
-      }
+    ForEach(vm.posts, id: \.self) { post in
+     VStack(alignment:.leading) {
+      Text(post?.title ?? "")
+       .font(.title)
+       .foregroundColor(.black)
+       // .multilineTextAlignment(.center)
+      Text(post?.body ?? "")
+       .font(.body)
+       .foregroundColor(.gray)
      }
-
     }
+   }
+  }
+
+ }
 }
 
 struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
+ static var previews: some View {
+  ContentView()
+ }
 }
 
 
@@ -51,7 +51,7 @@ class CombineTTypeViewModel : ObservableObject {
  init() {
   service.getPosts(modelToDecode: [Post].self, completion: { [weak self] data in
    self?.posts = data ?? []
-  }, cancellableSet: &cancellabels)
+  }, cancellableSet: &cancellabels, url: URL(string: "https://jsonplaceholder.typicode.com/posts")!)
  }
 
 
@@ -63,26 +63,25 @@ struct CombineTTypeService : CombineTTypeServiceProtocol {
  func getPosts< R : Codable >(
   modelToDecode model : R.Type,
   completion : @escaping (R?) -> Void,
-  cancellableSet :inout Set<AnyCancellable>
+  cancellableSet :inout Set<AnyCancellable>,
+  url :URL
  ) {
+
   var data : R?
-  let url = URL(string:"https://jsonplaceholder.typicode.com/posts")!
 
-   URLSession.shared.dataTaskPublisher(for: url)
-    .receive(on: DispatchQueue.main)
-    .tryMap(handleOutput)
-    .decode(type: R.self , decoder: JSONDecoder())
-    .sink { (completion) in
-     print("DEBUG: Completion is \(completion)")
-    } receiveValue: { returnedPosts in
-     data = returnedPosts
-     if let decodedData = data {
-      print(decodedData)
-      completion(decodedData)
-     }
-    }.store(in: &cancellableSet)
+  let url = url
 
-  }
+  URLSession.shared.dataTaskPublisher(for: url)
+   .receive(on: DispatchQueue.main)
+   .tryMap(handleOutput)
+   .decode(type: R.self , decoder: JSONDecoder())
+   .sink { (completion) in
+    print("DEBUG: Completion is \(completion)")
+   } receiveValue: { returnedPosts in
+    data = returnedPosts
+    if let decodedData = data { completion(decodedData) }
+   }.store(in: &cancellableSet)
+ }
 
 
  func handleOutput(output: URLSession.DataTaskPublisher.Output) throws  -> Data {
@@ -98,12 +97,17 @@ struct CombineTTypeService : CombineTTypeServiceProtocol {
 
 protocol CombineTTypeServiceProtocol {
 
- func getPosts<R: Codable>(modelToDecode model : R.Type, completion :  @escaping (R?) -> Void, cancellableSet :inout Set<AnyCancellable>)
+ func getPosts<R: Codable>(
+  modelToDecode model : R.Type,
+  completion :  @escaping (R?) -> Void,
+  cancellableSet :inout Set<AnyCancellable>,
+  url :URL
+ )
 
 }
 
 
-struct Post: Identifiable, Codable, Hashable {
+struct Post:  Codable, Hashable {
  let userId,id : Int?
  let title,body : String?
 }

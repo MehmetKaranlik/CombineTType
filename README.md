@@ -5,37 +5,63 @@ proccessing in background via Combine Framework.
 
 
 ````
-func getPosts< R : Codable >(
-  modelToDecode model : R.Type,
-  completion : @escaping (R?) -> Void,
-  cancellableSet :inout Set<AnyCancellable>,
-  url :URL
- ) {
+struct CombineManager {
 
-  var data : R?
+ let defaultTimeout : TimeInterval = TimeInterval(15)
 
-  let url = url
+ func send<T:Codable>( modelToDecode model : T.Type,    cancellableSet :inout Set<AnyCancellable>,url :URL, body : [String:Any]? , requestType : RequestType, completion : @escaping (T?) -> Void) throws  {
 
-  URLSession.shared.dataTaskPublisher(for: url)
-   .receive(on: DispatchQueue.main)
-   .tryMap(handleOutput)
-   .decode(type: R.self , decoder: JSONDecoder())
-   .sink { (completion) in
-    print("DEBUG: Completion is \(completion)")
-   } receiveValue: { returnedPosts in
-    data = returnedPosts
-    if let decodedData = data { completion(decodedData) }
-   }.store(in: &cancellableSet)
- }
- 
-  func handleOutput(output: URLSession.DataTaskPublisher.Output) throws  -> Data {
-  guard
-   let response = output.response as? HTTPURLResponse,
-   response.statusCode >= 200 && response.statusCode < 300 else {
-   throw URLError(.serverCertificateUntrusted)
+  var urlRequest = URLRequest(url: url,timeoutInterval: defaultTimeout)
+  urlRequest.httpMethod = requestType.rawValue
+
+  var data : T?
+
+  // handle body if there is
+  if let body = body {
+   do {
+    let decodedData = try JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
+    urlRequest.httpBody = decodedData
+   } catch let e {
+    throw e
+   }
   }
-  return output.data
+
+  URLSession.shared.dataTaskPublisher(for: urlRequest)
+   .tryMap(handleOutput)
+   .decode(type: T.self, decoder: JSONDecoder())
+   .sink { sinkCompletion  in
+    switch sinkCompletion{
+     case .finished:
+      break
+     case .failure(_):
+      break
+    }
+   } receiveValue: { receivedData in
+    data = receivedData
+    if let decodedData = data { completion(decodedData)  }
+    // define cancellabel either on where you call or either via DI
+   }
+   .store(in: &cancellableSet)
+
+
+
+
+
+
+  func handleOutput(output: URLSession.DataTaskPublisher.Output) throws  -> Data {
+   guard
+    let response = output.response as? HTTPURLResponse,
+    response.statusCode >= 200 && response.statusCode < 300 else {
+    throw URLError(.serverCertificateUntrusted)
+   }
+   return output.data
+  }
  }
+}
+
+enum RequestType : String {
+ case GET,POST,PUT,DELETE
+}
  
  ````
  

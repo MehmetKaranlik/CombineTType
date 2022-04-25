@@ -4,7 +4,7 @@ Networkign solution to handle T type where T: Codable.
 proccessing in background via Combine Framework.
 
 
-````
+````swift
 struct CombineManager {
 
  let defaultTimeout : TimeInterval = TimeInterval(15)

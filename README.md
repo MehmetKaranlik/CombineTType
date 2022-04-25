@@ -70,7 +70,7 @@ enum RequestType : String {
  Usage
  
  ````swift
- ------------------------
+ 
  struct CombineTTypeService : CombineTTypeServiceProtocol {
 
  var manager: CombineManager = CombineManager()
@@ -85,7 +85,6 @@ enum RequestType : String {
 }
 
 
-------------------------
 class CombineTTypeViewModel : ObservableObject {
 
  let service = CombineTTypeService()

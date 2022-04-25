@@ -14,6 +14,8 @@ struct CombineManager {
 
  let defaultTimeout : TimeInterval = TimeInterval(15)
 
+
+
  func send<T:Codable>( modelToDecode model : T.Type,    cancellableSet :inout Set<AnyCancellable>,url :URL, body : [String:Any]? , requestType : RequestType, completion : @escaping (T?) -> Void) throws  {
 
   var urlRequest = URLRequest(url: url,timeoutInterval: defaultTimeout)
@@ -35,17 +37,12 @@ struct CombineManager {
    .tryMap(handleOutput)
    .decode(type: T.self, decoder: JSONDecoder())
    .sink { sinkCompletion  in
-    switch sinkCompletion{
-     case .finished:
-      break
-     case .failure(_):
-      break
-    }
+    handleSink(sinkCompletion)
    } receiveValue: { receivedData in
     data = receivedData
-    if let decodedData = data { completion(decodedData)  }
-    // define cancellabel either on where you call or either via DI
+    if let decodedData = data { completion(decodedData) }
    }
+   // define cancellabel either on where you call or either via DI
    .store(in: &cancellableSet)
 
 
@@ -60,6 +57,15 @@ struct CombineManager {
     throw URLError(.serverCertificateUntrusted)
    }
    return output.data
+  }
+
+   func handleSink(_ sinkCompletion: Subscribers.Completion<Error>) {
+   switch sinkCompletion{
+    case .finished:
+     break
+    case .failure(_):
+     break
+   }
   }
  }
 }

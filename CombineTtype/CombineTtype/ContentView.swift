@@ -44,20 +44,12 @@ class CombineTTypeViewModel : ObservableObject {
 
  let service = CombineTTypeService()
  let url : URL = URL(string: "https://jsonplaceholder.typicode.com/posts")!
-
  @Published var posts : [Post?] = []
-
  var cancellabels = Set<AnyCancellable>()
-
- init() {
-
- }
-
  func fetchPosts() {
   service.getPosts(modelToDecode: [Post].self, cancellableSet: &cancellabels, url: url) { [weak self] data in
    self?.posts = data ?? []
   }
-
  }
 
 
@@ -65,13 +57,10 @@ class CombineTTypeViewModel : ObservableObject {
 
 
 struct CombineTTypeService : CombineTTypeServiceProtocol {
-
-
  var manager: CombineManager = CombineManager()
-
-
- func getPosts< R : Codable >(modelToDecode model : R.Type,cancellableSet :inout Set<AnyCancellable>,url :URL,completion : @escaping (R?) -> Void) {
-
+ func getPosts< R : Codable >(modelToDecode model : R.Type,
+                              cancellableSet :inout Set<AnyCancellable>,
+                              url :URL,completion : @escaping (R?) -> Void) {
   do {
    try manager.send(modelToDecode: model,
                     cancellableSet: &cancellableSet,

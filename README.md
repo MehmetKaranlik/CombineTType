@@ -69,13 +69,36 @@ enum RequestType : String {
  Usage
  
  ````
-   var posts : [Post?] = []
+ ------------------------
+ struct CombineTTypeService : CombineTTypeServiceProtocol {
 
-   var cancellabels = Set<AnyCancellable>()
- 
-   service.getPosts(modelToDecode: [Post].self, completion: { [weak self] data in
+ var manager: CombineManager = CombineManager()
+ func getPosts< R : Codable >(modelToDecode model : R.Type, cancellableSet :inout Set<AnyCancellable>, url :URL,completion : @escaping (R?) -> Void) {
+  do {
+   try manager.send(modelToDecode: model,cancellableSet: &cancellableSet,url: url, body: nil, requestType: .GET) { response in  completion(response) }
+  } catch let e {
+   print(e)
+  }
+ }
+}
+}
+
+
+------------------------
+class CombineTTypeViewModel : ObservableObject {
+ let service = CombineTTypeService()
+ let url : URL = URL(string: "https://jsonplaceholder.typicode.com/posts")!
+ @Published var posts : [Post?] = []
+ var cancellabels = Set<AnyCancellable>()
+ func fetchPosts() {
+  service.getPosts(modelToDecode: [Post].self, cancellableSet: &cancellabels, url: url) { [weak self] data in
    self?.posts = data ?? []
-  }, cancellableSet: &cancellabels, url: URL(string: "https://jsonplaceholder.typicode.com/posts")!)
+  }
+ }
+ }
+
+
+
  
  ````
  

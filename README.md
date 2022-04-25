@@ -86,16 +86,22 @@ enum RequestType : String {
 
 ------------------------
 class CombineTTypeViewModel : ObservableObject {
+
  let service = CombineTTypeService()
+ 
  let url : URL = URL(string: "https://jsonplaceholder.typicode.com/posts")!
+ 
  @Published var posts : [Post?] = []
+ 
  var cancellabels = Set<AnyCancellable>()
+ 
  func fetchPosts() {
   service.getPosts(modelToDecode: [Post].self, cancellableSet: &cancellabels, url: url) { [weak self] data in
    self?.posts = data ?? []
   }
  }
- }
+ 
+}
 
 
 

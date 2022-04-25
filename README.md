@@ -69,7 +69,7 @@ enum RequestType : String {
  
  Usage
  
- ````
+ ````swift
  ------------------------
  struct CombineTTypeService : CombineTTypeServiceProtocol {
 

@@ -40,11 +40,6 @@ struct CombineManager {
    // define cancellabel either on where you call or either via DI
    .store(in: &cancellableSet)
 
-
-
-
-
-
   func handleOutput(output: URLSession.DataTaskPublisher.Output) throws  -> Data {
    guard
     let response = output.response as? HTTPURLResponse,

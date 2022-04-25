@@ -9,7 +9,7 @@ struct CombineManager {
 
  let defaultTimeout : TimeInterval = TimeInterval(15)
 
- func send<T:Codable>( modelToDecode model : T.Type,    cancellableSet :inout Set<AnyCancellable>,url :URL, body : [String:Any]? , requestType : RequestType, completion : @escaping (T?) -> Void) throws  {
+ func send<T:Codable>( modelToDecode model : T.Type,cancellableSet :inout Set<AnyCancellable>,url :URL, body : [String:Any]? , requestType : RequestType, completion : @escaping (T?) -> Void) throws  {
 
   var urlRequest = URLRequest(url: url,timeoutInterval: defaultTimeout)
   urlRequest.httpMethod = requestType.rawValue
